@@ -20,13 +20,19 @@ const DASH: Record<ItemGroup, string> = {
 export default function AddItemRow({ onAdd, disabled, tone = "core", label = "add your own" }: Props) {
   const [editing, setEditing] = useState(false);
   const [text, setText] = useState("");
+  const [failed, setFailed] = useState(false);
 
   async function submit(e: FormEvent) {
     e.preventDefault();
     if (!text.trim()) return setEditing(false);
-    await onAdd(text);
-    setText("");
-    setEditing(false);
+    try {
+      await onAdd(text);
+      setText("");
+      setEditing(false);
+      setFailed(false);
+    } catch {
+      setFailed(true);
+    }
   }
 
   if (disabled) return null;
@@ -48,6 +54,7 @@ export default function AddItemRow({ onAdd, disabled, tone = "core", label = "ad
         placeholder="new item"
         className="h-11 w-full rounded-[13px] border-[1.5px] border-input-line bg-input px-3 text-[15px] outline-none focus:border-pink-300"
       />
+      {failed && <p className="pt-1.5 text-xs text-ink-soft">Couldn&apos;t save that. The database may need its update; see Settings.</p>}
     </form>
   );
 }

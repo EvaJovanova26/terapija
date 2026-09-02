@@ -21,7 +21,7 @@ interface Props {
 
 export default function EntryForm({ date, backHref }: Props) {
   const { draft, status, update, retry } = useEntry(date);
-  const { items, active, add } = useItems();
+  const { items, error, active, add } = useItems();
   const points = useMemo(() => (items ? itemPoints(items) : null), [items]);
   const rebound = useRebound(date, points);
   const loading = status === "loading" || items === null;
@@ -54,6 +54,12 @@ export default function EntryForm({ date, backHref }: Props) {
         </div>
       )}
 
+      {error && (
+        <div className="rounded-2xl border border-line bg-card px-3 py-3 text-[13px] leading-relaxed text-ink-soft">
+          Your items couldn&apos;t load, so nothing can be ticked yet. This usually means the database update in
+          <span className="font-semibold"> supabase/migrations/002_dynamic_items.sql</span> hasn&apos;t been run.
+        </div>
+      )}
       <fieldset disabled={loading} className="contents">
         {ITEM_GROUPS.map((group) => (
           <ItemSection key={group} group={group} items={active(group)} done={draft.done_items} onToggle={toggle} onAdd={(label) => add(group, label)} />

@@ -8,12 +8,17 @@ import { GROUP_META, type Item, type ItemGroup } from "@/lib/types";
 /** Loads the user's items and exposes small mutations. Seeds defaults on first use. */
 export function useItems() {
   const [items, setItems] = useState<Item[] | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
     fetchItems(createClient())
       .then((rows) => !cancelled && setItems(rows))
-      .catch(() => !cancelled && setItems([]));
+      .catch((e: Error) => {
+        if (cancelled) return;
+        setItems([]);
+        setError(e.message);
+      });
     return () => {
       cancelled = true;
     };
@@ -66,5 +71,5 @@ export function useItems() {
     [items, active],
   );
 
-  return { items, active, add, patch, move };
+  return { items, error, active, add, patch, move };
 }
