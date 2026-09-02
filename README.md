@@ -32,14 +32,18 @@ All rules live in `lib/garden-logic.ts` and `lib/streak.ts`.
 - Every item has its own point value (defaults: Core 1, Extra 2, Superpower 5).
 - A day after a zero-point day counts double.
 - Lifetime points are a high-water mark stored in `garden_state`; they never go down.
+- Plants unlock at the thresholds in `PLOT_ONE` / `PLOT_TWO`; the sprout is there from the start.
+- Garden objects (badges) are lifetime counts defined in `lib/badges.ts`: a 30-day streak,
+  seven full-Core days, 100 days logged, ten Superpowers.
 - The streak counts consecutive days with points, back from today (or yesterday if
   today is not logged yet).
 
 ## Layout
 
-- `app/` — routes: today (`/`), `/calendar`, `/entry/[date]`, `/garden`, `/settings`,
-  `/login`, auth callback, CSV export at `/api/export`.
-- `components/` — small single-purpose UI pieces, grouped by screen.
+- `app/` — routes: today (`/`), `/calendar`, `/entry/[date]`, `/garden`, `/stats`, `/notes`,
+  `/settings`, `/login`, auth callback, CSV export at `/api/export`.
+- `components/` — small single-purpose UI pieces, grouped by screen. `components/art/` is the
+  SVG sprite sheet (plants, badges, flower stages, decorations) ported from the design canvas.
 - `lib/` — types, local-date helpers, point rules, Supabase clients and all queries.
 - `supabase/schema.sql` — full schema for a fresh install.
 - `supabase/migrations/` — one-off upgrade scripts for existing databases.

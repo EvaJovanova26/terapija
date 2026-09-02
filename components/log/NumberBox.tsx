@@ -16,6 +16,9 @@ interface Props {
   onChange: (v: number | null) => void;
 }
 
+export const INPUT = "h-10 rounded-[13px] border-[1.5px] border-input-line bg-input text-center text-[15px] font-semibold text-ink outline-none focus:border-pink-300";
+
+/** Label on the left, a small box on the right, as in the design. */
 export default function NumberBox({ label, value, onChange }: Props) {
   // Local text so partial input like "0." survives while typing.
   const [text, setText] = useState(value === null ? "" : String(value));
@@ -24,8 +27,8 @@ export default function NumberBox({ label, value, onChange }: Props) {
   }, [value]);
 
   return (
-    <label className="flex flex-col gap-1">
-      <span className="text-sm text-ink-soft">{label}</span>
+    <label className="flex items-center gap-3 py-1.5">
+      <span className="flex-1 text-[15px] font-medium text-ink">{label}</span>
       <input
         type="text"
         inputMode="decimal"
@@ -35,7 +38,7 @@ export default function NumberBox({ label, value, onChange }: Props) {
           setText(e.target.value);
           onChange(parseNumber(e.target.value));
         }}
-        className="h-12 w-full rounded-xl border border-line bg-card px-3 text-base outline-none focus:border-moss-500"
+        className={`w-[76px] ${INPUT}`}
       />
     </label>
   );

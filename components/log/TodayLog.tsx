@@ -19,5 +19,5 @@ export default function TodayLog() {
   }, []);
 
   if (!date) return <div className="h-40" aria-hidden />;
-  return <EntryForm key={date} date={date} heading="Today" />;
+  return <EntryForm key={date} date={date} />;
 }

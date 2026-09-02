@@ -9,25 +9,26 @@ interface Props {
 
 const TEXT: Record<SaveStatus, string> = {
   loading: "loading",
-  idle: "",
+  idle: "ready",
   pending: "…",
   saving: "saving",
   saved: "saved",
   retry: "not saved yet",
 };
 
-/** Subtle save indicator. Never loud, never red. */
+/** A small pill. Never loud, never red. */
 export default function SaveBar({ status, onRetry }: Props) {
-  if (status === "retry") {
-    return (
-      <button type="button" onClick={onRetry} className="text-sm text-ink-soft underline decoration-line underline-offset-4">
-        {TEXT.retry} · retry
-      </button>
-    );
-  }
+  const retry = status === "retry";
   return (
-    <span className="text-sm text-ink-faint" aria-live="polite">
+    <button
+      type="button"
+      onClick={retry ? onRetry : undefined}
+      aria-live="polite"
+      className="mt-1.5 flex items-center gap-1.5 rounded-full bg-pink-100 px-3 py-1.5 text-xs font-semibold text-berry"
+    >
+      <span className={`h-1.5 w-1.5 rounded-full ${status === "saved" ? "bg-pink-500" : "bg-pink-300"}`} />
       {TEXT[status]}
-    </span>
+      {retry && " · retry"}
+    </button>
   );
 }

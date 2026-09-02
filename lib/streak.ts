@@ -14,3 +14,17 @@ export function currentStreak(byDate: Map<string, number>, today: string): numbe
   }
   return run;
 }
+
+/** The longest run of consecutive days with points, ever. Never decreases. */
+export function longestStreak(byDate: Map<string, number>): number {
+  const dates = [...byDate.keys()].filter((d) => (byDate.get(d) ?? 0) > 0).sort();
+  let best = 0;
+  let run = 0;
+  let prev: string | null = null;
+  for (const d of dates) {
+    run = prev && addDays(prev, 1) === d ? run + 1 : 1;
+    best = Math.max(best, run);
+    prev = d;
+  }
+  return best;
+}

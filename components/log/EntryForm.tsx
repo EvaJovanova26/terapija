@@ -1,10 +1,12 @@
 "use client";
 
 import { useMemo } from "react";
+import Link from "next/link";
 import { formatLong } from "@/lib/date";
-import { itemPoints } from "@/lib/garden-logic";
+import { basePoints, itemPoints } from "@/lib/garden-logic";
 import { ITEM_GROUPS } from "@/lib/types";
 import { useItems } from "@/components/items/useItems";
+import Sym, { VB } from "@/components/art/Sym";
 import ItemSection from "./ItemSection";
 import NumberInputs from "./NumberInputs";
 import JournalField from "./JournalField";
@@ -14,15 +16,16 @@ import { useRebound } from "./useRebound";
 
 interface Props {
   date: string;
-  heading: string;
+  backHref?: string;
 }
 
-export default function EntryForm({ date, heading }: Props) {
+export default function EntryForm({ date, backHref }: Props) {
   const { draft, status, update, retry } = useEntry(date);
   const { items, active, add } = useItems();
   const points = useMemo(() => (items ? itemPoints(items) : null), [items]);
   const rebound = useRebound(date, points);
   const loading = status === "loading" || items === null;
+  const today = points ? basePoints(draft, points) * (rebound ? 2 : 1) : 0;
 
   function toggle(id: string, on: boolean) {
     const rest = draft.done_items.filter((x) => x !== id);
@@ -30,26 +33,30 @@ export default function EntryForm({ date, heading }: Props) {
   }
 
   return (
-    <div className={`flex flex-col gap-4 transition-opacity ${loading ? "opacity-60" : ""}`}>
-      <header className="flex items-baseline justify-between">
+    <div className={`flex flex-col gap-3 transition-opacity ${loading ? "opacity-60" : ""}`}>
+      {backHref && (
+        <Link href={backHref} className="py-1 text-sm font-semibold text-pink-700">
+          ‹ Calendar
+        </Link>
+      )}
+      <header className="flex items-start justify-between gap-3 px-0.5">
         <div>
-          <h1 className="text-2xl font-semibold">{heading}</h1>
-          <p className="text-ink-soft">{formatLong(date)}</p>
-          {rebound && <p className="mt-1 text-sm text-moss-700">counts double today</p>}
+          <h1 className="font-display text-[26px] font-semibold leading-tight text-ink">{formatLong(date)}</h1>
+          <p className="mt-0.5 text-sm font-medium text-ink-soft">{today} points {backHref ? "that day" : "today"}</p>
         </div>
         <SaveBar status={status} onRetry={retry} />
       </header>
 
+      {rebound && (
+        <div className="flex items-center gap-2.5 rounded-2xl border border-gold-300 bg-[#fffbf2] px-3 py-3">
+          <Sym id="i-sparkle" vb={VB.icon} width={18} />
+          <p className="text-[13px] font-semibold text-ink-soft">Everything counts double today</p>
+        </div>
+      )}
+
       <fieldset disabled={loading} className="contents">
         {ITEM_GROUPS.map((group) => (
-          <ItemSection
-            key={group}
-            group={group}
-            items={active(group)}
-            done={draft.done_items}
-            onToggle={toggle}
-            onAdd={(label) => add(group, label)}
-          />
+          <ItemSection key={group} group={group} items={active(group)} done={draft.done_items} onToggle={toggle} onAdd={(label) => add(group, label)} />
         ))}
         <NumberInputs draft={draft} onChange={update} />
         <JournalField value={draft.note} onChange={(note) => update({ note })} />

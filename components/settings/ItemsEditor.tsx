@@ -12,29 +12,18 @@ export default function ItemsEditor() {
   if (items === null) return <div className="h-40" aria-hidden />;
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-3.5">
       {ITEM_GROUPS.map((group) => {
         const live = active(group).sort((a, b) => a.sort_order - b.sort_order);
         const retired = items.filter((i) => i.group_name === group && i.retired_at);
         const meta = GROUP_META[group];
         return (
-          <Collapsible
-            key={group}
-            id={`settings-${group}`}
-            title={meta.title}
-            tag={`${live.length} of ${meta.maxItems} slots`}
-            hint="Retired items disappear from the log but past days keep them."
-          >
-            <div className="flex flex-col gap-2">
+          <Collapsible key={group} id={`settings-${group}`} title={meta.title} tag={`${live.length} of ${meta.maxItems}`} tone={group}>
+            <div className="flex flex-col">
               {live.map((item) => (
-                <ItemRow
-                  key={item.id}
-                  item={item}
-                  onPatch={(changes) => patch(item.id, changes)}
-                  onMove={(dir) => move(item.id, dir)}
-                />
+                <ItemRow key={item.id} item={item} onPatch={(changes) => patch(item.id, changes)} onMove={(dir) => move(item.id, dir)} />
               ))}
-              <AddItemRow onAdd={(label) => add(group, label)} disabled={live.length >= meta.maxItems} />
+              <AddItemRow tone={group} label="add item" onAdd={(label) => add(group, label)} disabled={live.length >= meta.maxItems} />
               {retired.map((item) => (
                 <ItemRow key={item.id} item={item} onPatch={(changes) => patch(item.id, changes)} onMove={async () => {}} />
               ))}

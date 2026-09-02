@@ -2,19 +2,18 @@ import type { ReactNode } from "react";
 
 interface Props {
   title?: string;
-  hint?: string;
-  tone?: "default" | "soft";
+  meta?: string;
+  className?: string;
   children: ReactNode;
 }
 
-export default function Card({ title, hint, tone = "default", children }: Props) {
-  const bg = tone === "soft" ? "bg-paper border-dashed" : "bg-card";
+export default function Card({ title, meta, className = "", children }: Props) {
   return (
-    <section className={`rounded-2xl border border-line p-4 ${bg}`}>
+    <section className={`rounded-[22px] border border-line bg-card p-4 ${className}`}>
       {title && (
-        <header className="mb-3">
-          <h2 className="text-sm font-semibold uppercase tracking-wide text-ink-soft">{title}</h2>
-          {hint && <p className="mt-0.5 text-sm text-ink-faint">{hint}</p>}
+        <header className="mb-3 flex items-baseline justify-between gap-2">
+          <h2 className="text-[15px] font-semibold text-ink">{title}</h2>
+          {meta && <span className="text-xs font-medium text-ink-faint">{meta}</span>}
         </header>
       )}
       {children}

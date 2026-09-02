@@ -16,9 +16,9 @@ export default function MonthGrid({ month, entries, today }: Props) {
   const leading = weekdayMondayFirst(days[0]);
 
   return (
-    <div className="grid grid-cols-7 gap-1">
+    <div className="grid grid-cols-7 gap-x-1 gap-y-2">
       {WEEKDAYS.map((w, i) => (
-        <div key={i} className="pb-1 text-center text-xs text-ink-faint">
+        <div key={i} className="pb-1 text-center text-[11px] font-semibold text-ink-faint">
           {w}
         </div>
       ))}
@@ -27,13 +27,12 @@ export default function MonthGrid({ month, entries, today }: Props) {
       ))}
       {days.map((date) => {
         const entry = byDate.get(date);
-        const coreCount = entry ? entry.done_items.length : null;
         return (
           <DayDot
             key={date}
             date={date}
             dayNumber={Number(date.slice(8))}
-            coreCount={coreCount}
+            doneCount={entry ? entry.done_items.length : null}
             isToday={date === today}
           />
         );

@@ -26,37 +26,31 @@ export default function LoginForm() {
 
   if (phase === "sent") {
     return (
-      <p className="mt-8 rounded-2xl bg-moss-100 p-4 text-ink">
-        A sign-in link is on its way to <span className="font-medium">{email}</span>. Open it on
-        this device.
+      <p className="w-full rounded-[17px] bg-pink-100 p-4 text-[15px] text-ink">
+        A sign-in link is on its way to <span className="font-semibold">{email}</span>. Open it on this device.
       </p>
     );
   }
 
   return (
-    <form onSubmit={submit} className="mt-8 flex flex-col gap-3">
-      {expired && (
-        <p className="text-sm text-ink-soft">That link has already been used or expired. Ask for a fresh one below.</p>
-      )}
-      <label className="text-sm text-ink-soft" htmlFor="email">
-        Email
-      </label>
+    <form onSubmit={submit} className="flex w-full flex-col gap-3">
+      {expired && <p className="text-sm text-ink-soft">That link has already been used or expired. Ask for a fresh one below.</p>}
       <input
         id="email"
         type="email"
         autoComplete="email"
         inputMode="email"
         required
+        aria-label="Email"
+        placeholder="you@email.com"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
-        className="h-12 rounded-xl border border-line bg-card px-4 text-base outline-none focus:border-moss-500"
+        className="h-13 rounded-[17px] border-[1.5px] border-input-line bg-card px-4 text-base text-ink outline-none placeholder:text-ink-faint focus:border-pink-300"
       />
       <Button type="submit" disabled={phase === "sending"}>
         {phase === "sending" ? "Sending…" : "Email me a sign-in link"}
       </Button>
-      {phase === "problem" && (
-        <p className="text-sm text-ink-soft">Couldn&apos;t send the link just now. Try again in a moment.</p>
-      )}
+      {phase === "problem" && <p className="text-sm text-ink-soft">Couldn&apos;t send the link just now. Try again in a moment.</p>}
     </form>
   );
 }

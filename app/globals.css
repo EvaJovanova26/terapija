@@ -1,22 +1,44 @@
 @import "tailwindcss";
 
+/* Blossom palette, from the design canvas. */
 @theme {
-  --color-paper: #f7f4ee;
-  --color-card: #fffdf8;
-  --color-line: #e6dfd4;
-  --color-ink: #33302b;
-  --color-ink-soft: #7d746a;
-  --color-ink-faint: #b8afa3;
-  --color-moss-100: #e9f0e3;
-  --color-moss-200: #d3e2c9;
-  --color-moss-300: #b4cda6;
-  --color-moss-500: #7fa471;
-  --color-moss-700: #587a4d;
-  --color-sun-100: #fbf2dc;
-  --color-sun-300: #efd9a1;
-  --color-sun-500: #d8b565;
-  --color-sky-100: #e8f0f4;
-  --color-sky-300: #c3d8e3;
+  --color-bg: #ffeaf4;
+  --color-card: #ffffff;
+  --color-line: #f6c3df;
+  --color-ink: #4b0f45;
+  --color-ink-soft: #8a3e7a;
+  --color-ink-faint: #a868a8;
+  --color-pink-100: #fbd3e9;
+  --color-pink-200: #fbd9ea;
+  --color-pink-300: #f79ac8;
+  --color-pink-500: #ec4b98;
+  --color-pink-700: #c81e7c;
+  --color-berry: #a8125f;
+  --color-input: #fff5fb;
+  --color-input-line: #f2afd3;
+  --color-violet: #9b5de5;
+  --color-violet-ink: #7b2fd4;
+  --color-violet-deep: #5b2a8c;
+  --color-violet-100: #f9f1ff;
+  --color-violet-200: #e6d6fb;
+  --color-violet-300: #dcc8f5;
+  --color-violet-400: #c9a6f0;
+  --color-gold: #ffb627;
+  --color-gold-ink: #8a4b00;
+  --color-gold-100: #fffbeb;
+  --color-gold-200: #ffe9b0;
+  --color-gold-300: #ffd97a;
+  --color-gold-400: #ffcf70;
+  --color-mint: #1fc29a;
+  --color-mint-100: #dffbef;
+  --color-mint-300: #9fe8d2;
+  --color-aqua: #2eb8e6;
+  --color-coral: #ff7a3d;
+  --color-leaf: #6bcb77;
+  --color-tabbar: #fdf3f1;
+  --font-display: var(--font-baloo), "Baloo 2", cursive;
+  --font-body: var(--font-nunito), Nunito, system-ui, sans-serif;
+  --radius-card: 22px;
 }
 
 html {
@@ -25,12 +47,18 @@ html {
 }
 
 body {
-  background: var(--color-paper);
+  background: var(--color-bg);
   color: var(--color-ink);
-  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-family: var(--font-body);
   overscroll-behavior-y: none;
 }
 
 .safe-bottom {
   padding-bottom: env(safe-area-inset-bottom);
 }
+
+@keyframes bloom {
+  from { transform: scale(0.97); opacity: 0.6; }
+  to { transform: scale(1); opacity: 1; }
+}
+.bloom { animation: bloom 0.35s ease-out; }
