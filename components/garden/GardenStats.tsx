@@ -3,26 +3,34 @@ import Card from "@/components/ui/Card";
 
 interface Props {
   points: number;
+  streak: number;
   next: PlantDef | null;
   unlocked: PlantDef[];
 }
 
-/** Lifetime total and next unlock only. No daily or weekly figures. */
-export default function GardenStats({ points, next, unlocked }: Props) {
+/** Lifetime total, streak, and next unlock. */
+export default function GardenStats({ points, streak, next, unlocked }: Props) {
   return (
     <Card>
-      <div className="flex items-baseline justify-between">
+      <div className="grid grid-cols-3 gap-2">
         <div>
-          <p className="text-sm text-ink-soft">Lifetime points</p>
+          <p className="text-sm text-ink-soft">Lifetime</p>
           <p className="text-3xl font-semibold">{points}</p>
         </div>
-        <div className="text-right">
-          <p className="text-sm text-ink-soft">Next plant</p>
-          <p className="text-lg">{next ? `${next.name} at ${next.threshold}` : "Every plant is here"}</p>
+        <div>
+          <p className="text-sm text-ink-soft">Streak</p>
+          <p className="text-3xl font-semibold">
+            {streak}
+            <span className="ml-1 text-base font-normal text-ink-soft">{streak === 1 ? "day" : "days"}</span>
+          </p>
+        </div>
+        <div>
+          <p className="text-sm text-ink-soft">Next</p>
+          <p className="text-base leading-tight">{next ? `${next.name} at ${next.threshold}` : "All here"}</p>
         </div>
       </div>
       <p className="mt-3 text-sm text-ink-faint">
-        Points only ever go up. Nothing here fades, wilts, or resets.
+        Points only ever go up. A day after a zero day counts double.
       </p>
       {unlocked.length > 0 && (
         <ul className="mt-3 flex flex-wrap gap-2">

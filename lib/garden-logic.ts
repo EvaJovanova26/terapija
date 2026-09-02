@@ -1,23 +1,17 @@
-import { CORE_FIELDS, UPSIDE_FIELDS, type EntryDraft } from "./types";
+import { addDays } from "./date";
+import type { EntryDraft, Item } from "./types";
 
 /**
  * All point and unlock rules live here. Tune freely.
  * Points are additive only: nothing here ever subtracts.
  */
-export const POINTS_PER_CORE = 1;
-export const POINTS_PER_UPSIDE = 2;
+
+/** A day following a zero-point day counts double. The bad weeks are where the points are. */
+export const REBOUND_MULTIPLIER = 2;
 
 export type PlantKind =
-  | "sprout"
-  | "clover"
-  | "tulip"
-  | "fern"
-  | "lavender"
-  | "bush"
-  | "sunflower"
-  | "sapling"
-  | "tree"
-  | "willow";
+  | "sprout" | "clover" | "tulip" | "fern" | "lavender"
+  | "bush" | "sunflower" | "sapling" | "tree" | "willow";
 
 export interface PlantDef {
   kind: PlantKind;
@@ -40,25 +34,46 @@ export const PLANTS: PlantDef[] = [
   { kind: "willow", name: "Willow", threshold: 1000, x: 48 },
 ];
 
-/** Points earned by a single day's entry. Never negative. */
-export function pointsForEntry(entry: EntryDraft): number {
-  const core = CORE_FIELDS.filter((f) => entry[f]).length * POINTS_PER_CORE;
-  const upside = UPSIDE_FIELDS.filter((f) => entry[f]).length * POINTS_PER_UPSIDE;
-  return core + upside;
+export type PointsById = Map<string, number>;
+
+export function itemPoints(items: Item[]): PointsById {
+  return new Map(items.map((i) => [i.id, i.points]));
 }
 
-/** Sum of points across every entry. */
-export function sumPoints(entries: EntryDraft[]): number {
-  return entries.reduce((total, e) => total + pointsForEntry(e), 0);
+/** Base points for one day, before any multiplier. Never negative. */
+export function basePoints(entry: EntryDraft, points: PointsById): number {
+  return entry.done_items.reduce((sum, id) => sum + (points.get(id) ?? 0), 0);
 }
 
-/**
- * The number to display. `storedHighWater` is the lifetime total previously
- * recorded; the result is never lower than it, so edits to old days can only
- * add, never take away.
- */
-export function lifetimePoints(entries: EntryDraft[], storedHighWater: number): number {
-  return Math.max(sumPoints(entries), storedHighWater, 0);
+/** Base points keyed by date for every entry. */
+export function pointsByDate(entries: EntryDraft[], points: PointsById): Map<string, number> {
+  return new Map(entries.map((e) => [e.date, basePoints(e, points)]));
+}
+
+/** True when the day before `date` earned nothing and `date` is not the first day ever. */
+export function isReboundDay(date: string, byDate: Map<string, number>, firstDate: string | null): boolean {
+  if (!firstDate || date <= firstDate) return false;
+  return (byDate.get(addDays(date, -1)) ?? 0) === 0;
+}
+
+/** Points for one day with the rebound multiplier applied. */
+export function dayPoints(date: string, byDate: Map<string, number>, firstDate: string | null): number {
+  const base = byDate.get(date) ?? 0;
+  return isReboundDay(date, byDate, firstDate) ? base * REBOUND_MULTIPLIER : base;
+}
+
+/** Sum of multiplied points across every entry. */
+export function sumPoints(entries: EntryDraft[], points: PointsById): number {
+  const byDate = pointsByDate(entries, points);
+  const first = entries.reduce<string | null>((m, e) => (m === null || e.date < m ? e.date : m), null);
+  let total = 0;
+  for (const date of byDate.keys()) total += dayPoints(date, byDate, first);
+  return total;
+}
+
+/** The number to display. Never lower than the stored high-water mark. */
+export function lifetimePoints(entries: EntryDraft[], points: PointsById, storedHighWater: number): number {
+  return Math.max(sumPoints(entries, points), storedHighWater, 0);
 }
 
 export function unlockedPlants(points: number): PlantDef[] {
@@ -67,4 +82,12 @@ export function unlockedPlants(points: number): PlantDef[] {
 
 export function nextPlant(points: number): PlantDef | null {
   return PLANTS.find((p) => p.threshold > points) ?? null;
+}
+
+/** 0–1 progress from the last unlock to the next one. 1 when everything is unlocked. */
+export function progressToNext(points: number): number {
+  const next = nextPlant(points);
+  if (!next) return 1;
+  const prev = [...PLANTS].reverse().find((p) => p.threshold <= points)?.threshold ?? 0;
+  return Math.min(1, Math.max(0, (points - prev) / (next.threshold - prev)));
 }

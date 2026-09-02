@@ -3,10 +3,10 @@ import "./globals.css";
 import BottomNav from "@/components/nav/BottomNav";
 
 export const metadata: Metadata = {
-  title: "Baseline",
-  description: "A quiet daily tracker.",
+  title: "Blossom",
+  description: "Log the day, grow a garden.",
   manifest: "/manifest.webmanifest",
-  appleWebApp: { capable: true, statusBarStyle: "default", title: "Baseline" },
+  appleWebApp: { capable: true, statusBarStyle: "default", title: "Blossom" },
   icons: { icon: "/icons/icon-192.png", apple: "/icons/apple-touch-icon.png" },
 };
 

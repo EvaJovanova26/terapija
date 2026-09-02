@@ -1,7 +1,4 @@
-import type { Entry, GardenState } from "../types";
-
-type EntryInsert = Partial<Entry> & Pick<Entry, "date">;
-type GardenInsert = Partial<GardenState>;
+import type { Entry, GardenState, Item } from "../types";
 
 /** Minimal hand-written schema type mirroring supabase/schema.sql. */
 export interface Database {
@@ -9,19 +6,27 @@ export interface Database {
     Tables: {
       entries: {
         Row: Entry;
-        Insert: EntryInsert;
+        Insert: Partial<Entry> & Pick<Entry, "date">;
         Update: Partial<Entry>;
+        Relationships: [];
+      };
+      items: {
+        Row: Item;
+        Insert: Partial<Item> & Pick<Item, "label" | "group_name">;
+        Update: Partial<Item>;
         Relationships: [];
       };
       garden_state: {
         Row: GardenState;
-        Insert: GardenInsert;
+        Insert: Partial<GardenState>;
         Update: Partial<GardenState>;
         Relationships: [];
       };
     };
     Views: Record<string, never>;
-    Functions: Record<string, never>;
+    Functions: {
+      seed_default_items: { Args: { target?: string }; Returns: undefined };
+    };
     Enums: Record<string, never>;
     CompositeTypes: Record<string, never>;
   };

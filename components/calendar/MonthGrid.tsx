@@ -1,5 +1,5 @@
 import { daysInMonth, weekdayMondayFirst } from "@/lib/date";
-import { CORE_FIELDS, type Entry } from "@/lib/types";
+import type { Entry } from "@/lib/types";
 import DayDot from "./DayDot";
 
 interface Props {
@@ -27,7 +27,7 @@ export default function MonthGrid({ month, entries, today }: Props) {
       ))}
       {days.map((date) => {
         const entry = byDate.get(date);
-        const coreCount = entry ? CORE_FIELDS.filter((f) => entry[f]).length : null;
+        const coreCount = entry ? entry.done_items.length : null;
         return (
           <DayDot
             key={date}

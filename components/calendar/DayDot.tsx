@@ -3,7 +3,7 @@ import Link from "next/link";
 interface Props {
   date: string;
   dayNumber: number;
-  /** Number of core items logged; null when nothing was logged. */
+  /** Number of items ticked; null when the day has no entry. */
   coreCount: number | null;
   isToday: boolean;
 }
@@ -14,7 +14,7 @@ interface Props {
  */
 export default function DayDot({ date, dayNumber, coreCount, isToday }: Props) {
   const logged = coreCount !== null;
-  const opacity = logged ? 0.7 + 0.3 * Math.min(coreCount, 7) / 7 : 0.18;
+  const opacity = logged ? 0.7 + (0.3 * Math.min(coreCount, 8)) / 8 : 0.18;
 
   return (
     <Link
