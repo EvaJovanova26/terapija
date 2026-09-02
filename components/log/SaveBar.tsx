@@ -8,7 +8,7 @@ interface Props {
 }
 
 const TEXT: Record<SaveStatus, string> = {
-  loading: "",
+  loading: "loading",
   idle: "",
   pending: "…",
   saving: "saving",

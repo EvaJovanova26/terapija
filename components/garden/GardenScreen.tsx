@@ -7,7 +7,7 @@ import { fetchAllEntries, fetchGardenState, saveLifetimePoints } from "@/lib/sup
 import GardenView from "./GardenView";
 import GardenStats from "./GardenStats";
 
-export default function GardenPage() {
+export default function GardenScreen() {
   const [points, setPoints] = useState<number | null>(null);
 
   useEffect(() => {
