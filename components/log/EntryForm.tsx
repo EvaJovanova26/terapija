@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 import Link from "next/link";
-import { formatLong } from "@/lib/date";
+import { addDays, formatLong } from "@/lib/date";
 import { basePoints, itemPoints } from "@/lib/garden-logic";
 import { ITEM_GROUPS } from "@/lib/types";
 import { useItems } from "@/components/items/useItems";
@@ -67,6 +67,10 @@ export default function EntryForm({ date, backHref }: Props) {
         <NumberInputs draft={draft} onChange={update} />
         <JournalField value={draft.note} onChange={(note) => update({ note })} />
       </fieldset>
+      <div className="flex justify-between px-2 pt-1 text-sm font-semibold text-pink-700">
+        <Link href={`/entry/${addDays(date, -1)}`}>‹ {backHref ? "day before" : "fill in yesterday"}</Link>
+        <Link href="/settings">edit items</Link>
+      </div>
     </div>
   );
 }

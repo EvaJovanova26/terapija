@@ -2,8 +2,10 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { fetchItems, insertItem, updateItem } from "@/lib/supabase/queries";
+import { deleteItem, fetchItems, insertItem, saveItemOrder, updateItem } from "@/lib/supabase/queries";
 import { GROUP_META, type Item, type ItemGroup } from "@/lib/types";
+
+const bySort = (a: Item, b: Item) => a.sort_order - b.sort_order || a.created_at.localeCompare(b.created_at);
 
 /** Loads the user's items and exposes small mutations. Seeds defaults on first use. */
 export function useItems() {
@@ -24,8 +26,9 @@ export function useItems() {
     };
   }, []);
 
+  /** Live items in one group, in display order. */
   const active = useCallback(
-    (group: ItemGroup) => (items ?? []).filter((i) => i.group_name === group && !i.retired_at),
+    (group: ItemGroup) => (items ?? []).filter((i) => i.group_name === group && !i.retired_at).sort(bySort),
     [items],
   );
 
@@ -36,12 +39,7 @@ export function useItems() {
       const siblings = active(group);
       if (siblings.length >= GROUP_META[group].maxItems) return;
       const sort_order = Math.max(0, ...siblings.map((i) => i.sort_order)) + 1;
-      const created = await insertItem(createClient(), {
-        label: trimmed,
-        group_name: group,
-        points: GROUP_META[group].defaultPoints,
-        sort_order,
-      });
+      const created = await insertItem(createClient(), { label: trimmed, group_name: group, points: GROUP_META[group].defaultPoints, sort_order });
       setItems((cur) => [...(cur ?? []), created]);
     },
     [active],
@@ -52,24 +50,17 @@ export function useItems() {
     setItems((cur) => (cur ?? []).map((i) => (i.id === id ? updated : i)));
   }, []);
 
-  /** Swap sort order with the neighbour above (-1) or below (+1) in the same group. */
-  const move = useCallback(
-    async (id: string, direction: -1 | 1) => {
-      const item = (items ?? []).find((i) => i.id === id);
-      if (!item) return;
-      const group = active(item.group_name).sort((a, b) => a.sort_order - b.sort_order);
-      const idx = group.findIndex((i) => i.id === id);
-      const other = group[idx + direction];
-      if (!other) return;
-      const db = createClient();
-      const [a, b] = await Promise.all([
-        updateItem(db, item.id, { sort_order: other.sort_order }),
-        updateItem(db, other.id, { sort_order: item.sort_order }),
-      ]);
-      setItems((cur) => (cur ?? []).map((i) => (i.id === a.id ? a : i.id === b.id ? b : i)));
-    },
-    [items, active],
-  );
+  /** Permanent. Past days keep the id in their list but it no longer counts or shows. */
+  const remove = useCallback(async (id: string) => {
+    await deleteItem(createClient(), id);
+    setItems((cur) => (cur ?? []).filter((i) => i.id !== id));
+  }, []);
 
-  return { items, error, active, add, patch, move };
+  /** Applies a new order for one group. Updates the screen first, then the database. */
+  const reorder = useCallback(async (ids: string[]) => {
+    setItems((cur) => (cur ?? []).map((i) => (ids.includes(i.id) ? { ...i, sort_order: ids.indexOf(i.id) + 1 } : i)));
+    await saveItemOrder(createClient(), ids);
+  }, []);
+
+  return { items, error, active, add, patch, remove, reorder };
 }

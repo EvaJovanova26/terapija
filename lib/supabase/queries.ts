@@ -86,6 +86,18 @@ export async function updateItem(db: Db, id: string, patch: Partial<Item>): Prom
   return data;
 }
 
+export async function deleteItem(db: Db, id: string): Promise<void> {
+  const { error } = await db.from("items").delete().eq("id", id);
+  if (error) fail("deleteItem", error);
+}
+
+/** Persists a new order: position in `ids` becomes sort_order. */
+export async function saveItemOrder(db: Db, ids: string[]): Promise<void> {
+  const results = await Promise.all(ids.map((id, i) => db.from("items").update({ sort_order: i + 1 }).eq("id", id)));
+  const bad = results.find((r) => r.error);
+  if (bad?.error) fail("saveItemOrder", bad.error);
+}
+
 // Garden ------------------------------------------------------------------
 
 export async function fetchGardenState(db: Db): Promise<GardenState | null> {
