@@ -1,5 +1,6 @@
 -- Migration 002: dynamic items.
--- Run ONCE in the Supabase SQL editor on a database created with the original schema.sql.
+-- Run in the Supabase SQL editor on a database created with the original schema.sql.
+-- Safe to run more than once: every step checks whether it has already happened.
 -- Moves the fixed boolean columns into a per-user "items" list, adds new context numbers,
 -- and seeds the default items for every existing user. Nothing is lost.
 
@@ -85,23 +86,31 @@ alter table public.entries
   add column if not exists mood          smallint null check (mood between 1 and 5),
   add column if not exists energy        smallint null check (energy between 1 and 5);
 
-update public.entries e set done_items = coalesce((
-  select array_agg(i.id)
-  from public.items i
-  where i.user_id = e.user_id and (
-    (i.label = 'Ate' and e.ate) or (i.label = 'Water' and e.water) or
-    (i.label = 'Teeth' and e.teeth) or (i.label = 'Shower' and e.shower) or
-    (i.label = 'Meds taken' and e.meds) or (i.label = 'Left the house' and e.left_house) or
-    (i.label = 'Slept' and e.slept) or (i.label = 'Exercised' and e.exercised) or
-    (i.label = 'Talked to someone' and e.talked_to_someone) or
-    (i.label = 'Cooked rather than ordered' and e.cooked) or
-    (i.label = 'Made something' and e.made_something))
-), '{}')
-where cardinality(e.done_items) = 0;
+-- Copy the old ticks across, then drop the old columns. Skipped if this already ran.
+do $$
+begin
+  if exists (
+    select 1 from information_schema.columns
+    where table_schema = 'public' and table_name = 'entries' and column_name = 'ate'
+  ) then
+    update public.entries e set done_items = coalesce((
+      select array_agg(i.id)
+      from public.items i
+      where i.user_id = e.user_id and (
+        (i.label = 'Ate' and e.ate) or (i.label = 'Water' and e.water) or
+        (i.label = 'Teeth' and e.teeth) or (i.label = 'Shower' and e.shower) or
+        (i.label = 'Meds taken' and e.meds) or (i.label = 'Left the house' and e.left_house) or
+        (i.label = 'Slept' and e.slept) or (i.label = 'Exercised' and e.exercised) or
+        (i.label = 'Talked to someone' and e.talked_to_someone) or
+        (i.label = 'Cooked rather than ordered' and e.cooked) or
+        (i.label = 'Made something' and e.made_something))
+    ), '{}')
+    where cardinality(e.done_items) = 0;
 
-alter table public.entries
-  drop column if exists ate, drop column if exists water, drop column if exists teeth,
-  drop column if exists shower, drop column if exists meds, drop column if exists left_house,
-  drop column if exists slept, drop column if exists exercised,
-  drop column if exists talked_to_someone, drop column if exists cooked,
-  drop column if exists made_something;
+    alter table public.entries
+      drop column ate, drop column water, drop column teeth, drop column shower,
+      drop column meds, drop column left_house, drop column slept, drop column exercised,
+      drop column talked_to_someone, drop column cooked, drop column made_something;
+  end if;
+end;
+$$;
