@@ -1,0 +1,43 @@
+import { daysInMonth, weekdayMondayFirst } from "@/lib/date";
+import { CORE_FIELDS, type Entry } from "@/lib/types";
+import DayDot from "./DayDot";
+
+interface Props {
+  month: string; // any date in the month, YYYY-MM-DD
+  entries: Entry[];
+  today: string;
+}
+
+const WEEKDAYS = ["M", "T", "W", "T", "F", "S", "S"];
+
+export default function MonthGrid({ month, entries, today }: Props) {
+  const byDate = new Map(entries.map((e) => [e.date, e]));
+  const days = daysInMonth(month);
+  const leading = weekdayMondayFirst(days[0]);
+
+  return (
+    <div className="grid grid-cols-7 gap-1">
+      {WEEKDAYS.map((w, i) => (
+        <div key={i} className="pb-1 text-center text-xs text-ink-faint">
+          {w}
+        </div>
+      ))}
+      {Array.from({ length: leading }).map((_, i) => (
+        <div key={`pad-${i}`} />
+      ))}
+      {days.map((date) => {
+        const entry = byDate.get(date);
+        const coreCount = entry ? CORE_FIELDS.filter((f) => entry[f]).length : null;
+        return (
+          <DayDot
+            key={date}
+            date={date}
+            dayNumber={Number(date.slice(8))}
+            coreCount={coreCount}
+            isToday={date === today}
+          />
+        );
+      })}
+    </div>
+  );
+}

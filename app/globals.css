@@ -1,0 +1,36 @@
+@import "tailwindcss";
+
+@theme {
+  --color-paper: #f7f4ee;
+  --color-card: #fffdf8;
+  --color-line: #e6dfd4;
+  --color-ink: #33302b;
+  --color-ink-soft: #7d746a;
+  --color-ink-faint: #b8afa3;
+  --color-moss-100: #e9f0e3;
+  --color-moss-200: #d3e2c9;
+  --color-moss-300: #b4cda6;
+  --color-moss-500: #7fa471;
+  --color-moss-700: #587a4d;
+  --color-sun-100: #fbf2dc;
+  --color-sun-300: #efd9a1;
+  --color-sun-500: #d8b565;
+  --color-sky-100: #e8f0f4;
+  --color-sky-300: #c3d8e3;
+}
+
+html {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  overscroll-behavior-y: none;
+}
+
+.safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
