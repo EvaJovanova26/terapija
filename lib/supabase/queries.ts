@@ -5,12 +5,17 @@ function fail(context: string, error: { message: string }): never {
   throw new Error(`${context}: ${error.message}`);
 }
 
+/** Guards against rows from a database that has not run migration 002 yet. */
+function normalize(e: Entry): Entry {
+  return { ...e, done_items: Array.isArray(e.done_items) ? e.done_items : [] };
+}
+
 // Entries -----------------------------------------------------------------
 
 export async function fetchEntry(db: Db, date: string): Promise<Entry | null> {
   const { data, error } = await db.from("entries").select("*").eq("date", date).maybeSingle();
   if (error) fail("fetchEntry", error);
-  return data ?? null;
+  return data ? normalize(data) : null;
 }
 
 /** Insert or update the entry for `draft.date`. user_id comes from the DB default. */
@@ -21,7 +26,7 @@ export async function upsertEntry(db: Db, draft: EntryDraft): Promise<Entry> {
     .select("*")
     .single();
   if (error) fail("upsertEntry", error);
-  return data;
+  return normalize(data);
 }
 
 export async function fetchEntriesBetween(db: Db, start: string, end: string): Promise<Entry[]> {
@@ -32,13 +37,13 @@ export async function fetchEntriesBetween(db: Db, start: string, end: string): P
     .lte("date", end)
     .order("date", { ascending: true });
   if (error) fail("fetchEntriesBetween", error);
-  return data ?? [];
+  return (data ?? []).map(normalize);
 }
 
 export async function fetchAllEntries(db: Db): Promise<Entry[]> {
   const { data, error } = await db.from("entries").select("*").order("date", { ascending: true });
   if (error) fail("fetchAllEntries", error);
-  return data ?? [];
+  return (data ?? []).map(normalize);
 }
 
 export async function fetchFirstEntryDate(db: Db): Promise<string | null> {
