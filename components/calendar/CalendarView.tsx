@@ -35,11 +35,11 @@ export default function CalendarView() {
 
   if (!month || !today) return <div className="h-40" aria-hidden />;
 
-  // Browse back three years (or to the first entry if older); forward only to the current month.
+  // Browse back three years (or to the first entry if older) and a year ahead.
   const floor = monthKey(addMonths(today, -36));
   const earliest = firstEntry && monthKey(firstEntry) < floor ? monthKey(firstEntry) : floor;
   const canBack = monthKey(month) > earliest;
-  const canForward = monthKey(month) < monthKey(today);
+  const canForward = monthKey(month) < monthKey(addMonths(today, 12));
 
   return (
     <div className="flex flex-col gap-4 px-1">

@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import Collapsible from "@/components/ui/Collapsible";
 import Toggle from "@/components/ui/Toggle";
@@ -15,17 +16,40 @@ interface Props {
   onAdd: (label: string) => Promise<void>;
 }
 
+const key = (group: ItemGroup) => `blossom.hideDone.${group}`;
+
+function readHide(group: ItemGroup): boolean {
+  try {
+    return localStorage.getItem(key(group)) === "1";
+  } catch {
+    return false;
+  }
+}
+
 export default function ItemSection({ group, items, done, onToggle, onAdd }: Props) {
   const meta = GROUP_META[group];
+  const [hideDone, setHideDone] = useState(false);
+  useEffect(() => setHideDone(readHide(group)), [group]);
+
+  function toggleHide() {
+    const next = !hideDone;
+    setHideDone(next);
+    try {
+      localStorage.setItem(key(group), next ? "1" : "0");
+    } catch {}
+  }
+
   const same = items.length > 0 && items.every((i) => i.points === items[0].points);
   const pts = same ? items[0].points : meta.defaultPoints;
-  const tag = `${pts} pt${pts === 1 ? "" : "s"} each`;
   const doneSet = new Set(done);
+  const ticked = items.filter((i) => doneSet.has(i.id)).length;
+  const visible = hideDone ? items.filter((i) => !doneSet.has(i.id)) : items;
+
   return (
     <Collapsible
       id={group}
       title={meta.title}
-      tag={tag}
+      tag={`${pts} pt${pts === 1 ? "" : "s"} each`}
       tone={group}
       icon={group === "superpower" ? <Sym id="i-sparkle" vb={VB.icon} width={18} /> : undefined}
       action={
@@ -37,10 +61,16 @@ export default function ItemSection({ group, items, done, onToggle, onAdd }: Pro
       }
     >
       <div className="flex flex-col gap-0.5">
-        {items.map((item) => (
+        {visible.map((item) => (
           <Toggle key={item.id} tone={group} label={item.label} checked={doneSet.has(item.id)} onChange={(on) => onToggle(item.id, on)} />
         ))}
+        {hideDone && visible.length === 0 && <p className="px-2.5 py-2 text-sm text-ink-faint">All ticked.</p>}
         <AddItemRow tone={group} onAdd={onAdd} disabled={items.length >= meta.maxItems} />
+        {ticked > 0 && (
+          <button type="button" onClick={toggleHide} className="min-h-10 rounded-[14px] px-2.5 text-left text-xs font-semibold text-ink-faint active:bg-black/5">
+            {hideDone ? `show ${ticked} ticked` : `hide ${ticked} ticked`}
+          </button>
+        )}
       </div>
     </Collapsible>
   );
