@@ -35,7 +35,9 @@ export default function CalendarView() {
 
   if (!month || !today) return <div className="h-40" aria-hidden />;
 
-  const earliest = firstEntry ? monthKey(firstEntry) : monthKey(today);
+  // Browse back three years (or to the first entry if older); forward only to the current month.
+  const floor = monthKey(addMonths(today, -36));
+  const earliest = firstEntry && monthKey(firstEntry) < floor ? monthKey(firstEntry) : floor;
   const canBack = monthKey(month) > earliest;
   const canForward = monthKey(month) < monthKey(today);
 
@@ -47,7 +49,7 @@ export default function CalendarView() {
         <span className="flex items-center gap-1.5 text-xs font-medium text-ink-soft"><Sym id="f-100" vb={VB.flower} width={16} /> logged</span>
         <span className="flex items-center gap-1.5 text-xs font-medium text-ink-faint"><Sym id="f-0" vb={VB.flower} width={16} opacity={0.22} /> not logged</span>
       </div>
-      <p className="text-[13px] text-ink-faint">Tap a day to open it.</p>
+      <p className="text-[13px] text-ink-faint">Tap a day to open it. Any day can be filled in, however far back.</p>
       <div className="flex items-end justify-between pt-3 opacity-90">
         <Sym id="d-mushrooms" vb={VB.mushrooms} width={76} />
         <Sym id="d-butterfly" vb={VB.small} width={34} />
