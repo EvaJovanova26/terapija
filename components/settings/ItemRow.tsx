@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, type HTMLAttributes } from "react";
-import type { Item } from "@/lib/types";
+import { TRAITS, type Item, type Trait } from "@/lib/types";
+import { ROOMS } from "@/lib/grow/rooms";
 
 interface Props {
   item: Item;
@@ -53,6 +54,25 @@ export default function ItemRow({ item, open, dragging, onOpen, onPatch, onDelet
             Points
             <input type="number" min={0} inputMode="numeric" value={item.points} onChange={(e) => void onPatch({ points: Math.max(0, Number(e.target.value) || 0) })} className="h-10 w-16 rounded-[12px] border-[1.5px] border-input-line bg-input text-center text-[15px] font-semibold text-ink outline-none focus:border-pink-300" />
           </label>
+          <label className="flex items-center gap-2 text-xs font-semibold text-ink-soft">
+            Room
+            <select value={item.domain} onChange={(e) => void onPatch({ domain: e.target.value as Item["domain"] })} className="h-10 flex-1 rounded-[12px] border-[1.5px] border-line bg-card px-2 text-sm font-medium text-ink outline-none">
+              {ROOMS.map((r) => <option key={r.domain} value={r.domain}>{r.name}</option>)}
+            </select>
+          </label>
+          <div className="flex flex-col gap-1 text-xs font-semibold text-ink-soft">
+            Traits it feeds
+            <div className="flex flex-wrap gap-1.5">
+              {TRAITS.map((t) => {
+                const on = item.traits.includes(t);
+                return (
+                  <button key={t} type="button" aria-pressed={on} onClick={() => void onPatch({ traits: on ? item.traits.filter((x) => x !== t) : [...item.traits, t as Trait] })} className={`rounded-full border px-2.5 py-1 text-xs capitalize ${on ? "border-accent bg-accent-soft text-ink" : "border-line text-ink-soft"}`}>
+                    {t}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
           <div className="flex gap-1 pt-1">
             <button type="button" className={`${btn} text-ink-soft`} onClick={() => void onPatch({ retired_at: retired ? null : new Date().toISOString() })}>
               {retired ? "Restore" : "Retire"}

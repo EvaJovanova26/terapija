@@ -7,6 +7,8 @@ import { basePoints, itemPoints } from "@/lib/garden-logic";
 import { ITEM_GROUPS } from "@/lib/types";
 import { useItems } from "@/components/items/useItems";
 import Sym, { VB } from "@/components/art/Sym";
+import AvatarFigure, { poseForPoints } from "@/components/you/AvatarFigure";
+import { useProfile } from "@/components/you/useProfile";
 import ItemSection from "./ItemSection";
 import NumberInputs from "./NumberInputs";
 import JournalField from "./JournalField";
@@ -22,6 +24,7 @@ interface Props {
 export default function EntryForm({ date, backHref }: Props) {
   const { draft, status, update, retry } = useEntry(date);
   const { items, error, active, add } = useItems();
+  const { avatar } = useProfile();
   const points = useMemo(() => (items ? itemPoints(items) : null), [items]);
   const rebound = useRebound(date, points);
   const loading = status === "loading" || items === null;
@@ -44,7 +47,10 @@ export default function EntryForm({ date, backHref }: Props) {
           <h1 className="font-display text-[26px] font-semibold leading-tight text-ink">{formatLong(date)}</h1>
           <p className="mt-0.5 text-sm font-medium text-ink-soft">{today} points {backHref ? "that day" : "today"}</p>
         </div>
-        <SaveBar status={status} onRetry={retry} />
+        <div className="flex flex-col items-end">
+          <AvatarFigure avatar={avatar ?? {}} pose={poseForPoints(today)} size={56} />
+          <SaveBar status={status} onRetry={retry} />
+        </div>
       </header>
 
       {rebound && (

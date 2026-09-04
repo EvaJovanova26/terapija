@@ -17,7 +17,7 @@ export async function GET() {
   return new NextResponse(entriesToCsv(entries, items), {
     headers: {
       "Content-Type": "text/csv; charset=utf-8",
-      "Content-Disposition": 'attachment; filename="blossom-entries.csv"',
+      "Content-Disposition": 'attachment; filename="grow-entries.csv"',
       "Cache-Control": "no-store",
     },
   });

@@ -1,4 +1,4 @@
-import type { Entry, EntryDraft, GardenState, Item } from "../types";
+import type { Entry, EntryDraft, GardenState, Item, Profile } from "../types";
 import type { Db } from "./client";
 
 function fail(context: string, error: { message: string }): never {
@@ -74,7 +74,7 @@ export async function fetchItems(db: Db): Promise<Item[]> {
   return data ?? [];
 }
 
-export async function insertItem(db: Db, item: Pick<Item, "label" | "group_name" | "points" | "sort_order">): Promise<Item> {
+export async function insertItem(db: Db, item: Pick<Item, "label" | "group_name" | "points" | "sort_order" | "domain" | "traits">): Promise<Item> {
   const { data, error } = await db.from("items").insert(item).select("*").single();
   if (error) fail("insertItem", error);
   return data;
@@ -96,6 +96,19 @@ export async function saveItemOrder(db: Db, ids: string[]): Promise<void> {
   const results = await Promise.all(ids.map((id, i) => db.from("items").update({ sort_order: i + 1 }).eq("id", id)));
   const bad = results.find((r) => r.error);
   if (bad?.error) fail("saveItemOrder", bad.error);
+}
+
+// Profile -----------------------------------------------------------------
+
+export async function fetchProfile(db: Db): Promise<Profile | null> {
+  const { data, error } = await db.from("profiles").select("*").maybeSingle();
+  if (error) fail("fetchProfile", error);
+  return data ?? null;
+}
+
+export async function saveProfile(db: Db, patch: Pick<Profile, "avatar"> & Partial<Pick<Profile, "display_name">>): Promise<void> {
+  const { error } = await db.from("profiles").upsert(patch, { onConflict: "user_id" });
+  if (error) fail("saveProfile", error);
 }
 
 // Garden ------------------------------------------------------------------

@@ -39,7 +39,7 @@ export function useItems() {
       const siblings = active(group);
       if (siblings.length >= GROUP_META[group].maxItems) return;
       const sort_order = Math.max(0, ...siblings.map((i) => i.sort_order)) + 1;
-      const created = await insertItem(createClient(), { label: trimmed, group_name: group, points: GROUP_META[group].defaultPoints, sort_order });
+      const created = await insertItem(createClient(), { label: trimmed, group_name: group, points: GROUP_META[group].defaultPoints, sort_order, domain: "living", traits: [] });
       setItems((cur) => [...(cur ?? []), created]);
     },
     [active],

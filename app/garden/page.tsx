@@ -1,7 +1,5 @@
-import GardenScreen from "@/components/garden/GardenScreen";
+import { redirect } from "next/navigation";
 
-export const metadata = { title: "Garden · Blossom" };
-
-export default function Page() {
-  return <GardenScreen />;
+export default function GardenPage() {
+  redirect("/home");
 }

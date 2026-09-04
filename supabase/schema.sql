@@ -1,5 +1,5 @@
--- Blossom schema (fresh install). For an existing database created from the
--- original schema, run supabase/migrations/002_dynamic_items.sql instead.
+-- grow schema (fresh install). For an existing database, run the files in
+-- supabase/migrations/ in order instead.
 
 create extension if not exists "pgcrypto";
 
@@ -19,6 +19,9 @@ create table if not exists public.items (
   group_name  text not null check (group_name in ('core', 'extra', 'superpower')),
   points      integer not null default 1 check (points >= 0),
   sort_order  integer not null default 0,
+  domain      text not null default 'living'
+    check (domain in ('kitchen', 'reading', 'bedroom', 'doorway', 'bathroom', 'living')),
+  traits      text[] not null default '{}',
   retired_at  timestamptz null,
   created_at  timestamptz not null default now(),
   updated_at  timestamptz not null default now()
@@ -53,12 +56,24 @@ create table if not exists public.garden_state (
   updated_at      timestamptz not null default now()
 );
 
+-- Profile: display name and avatar choices. ---------------------------------
+create table if not exists public.profiles (
+  user_id      uuid primary key default auth.uid() references auth.users (id) on delete cascade,
+  display_name text null,
+  avatar       jsonb not null default '{}'::jsonb,
+  created_at   timestamptz not null default now(),
+  updated_at   timestamptz not null default now()
+);
+
 -- updated_at triggers -----------------------------------------------------------
 drop trigger if exists items_set_updated_at on public.items;
 create trigger items_set_updated_at before update on public.items
   for each row execute function public.set_updated_at();
 drop trigger if exists entries_set_updated_at on public.entries;
 create trigger entries_set_updated_at before update on public.entries
+  for each row execute function public.set_updated_at();
+drop trigger if exists profiles_set_updated_at on public.profiles;
+create trigger profiles_set_updated_at before update on public.profiles
   for each row execute function public.set_updated_at();
 drop trigger if exists garden_state_set_updated_at on public.garden_state;
 create trigger garden_state_set_updated_at before update on public.garden_state
@@ -68,12 +83,16 @@ create trigger garden_state_set_updated_at before update on public.garden_state
 alter table public.items enable row level security;
 alter table public.entries enable row level security;
 alter table public.garden_state enable row level security;
+alter table public.profiles enable row level security;
 
 drop policy if exists "items: own rows" on public.items;
 create policy "items: own rows" on public.items for all to authenticated
   using (user_id = auth.uid()) with check (user_id = auth.uid());
 drop policy if exists "entries: own rows" on public.entries;
 create policy "entries: own rows" on public.entries for all to authenticated
+  using (user_id = auth.uid()) with check (user_id = auth.uid());
+drop policy if exists "profiles: own row" on public.profiles;
+create policy "profiles: own row" on public.profiles for all to authenticated
   using (user_id = auth.uid()) with check (user_id = auth.uid());
 drop policy if exists "garden_state: own row" on public.garden_state;
 create policy "garden_state: own row" on public.garden_state for all to authenticated
@@ -86,29 +105,47 @@ begin
   if target is null or exists (select 1 from public.items where user_id = target) then
     return;
   end if;
-  insert into public.items (user_id, label, group_name, points, sort_order)
-  select target, label, grp, pts, ord from (values
-    ('Ate', 'core', 1, 1), ('Ate before 11am', 'core', 1, 2), ('Water', 'core', 1, 3),
-    ('Meds taken', 'core', 1, 4), ('Elvanse at a consistent time', 'core', 1, 5),
-    ('Slept', 'core', 1, 6), ('Teeth', 'core', 1, 7), ('Shower', 'core', 1, 8),
-    ('Changed clothes', 'core', 1, 9), ('Made the bed', 'core', 1, 10),
-    ('Daylight before noon', 'core', 1, 11), ('Left the house', 'core', 1, 12),
-    ('Replied to one message', 'core', 1, 13), ('Took something out of the flat', 'core', 1, 14),
-    ('Walk', 'extra', 2, 1), ('Duolingo', 'extra', 2, 2), ('Read anything', 'extra', 2, 3),
-    ('Cooked rather than ordered', 'extra', 2, 4), ('Tidied one surface', 'extra', 2, 5),
-    ('One admin task', 'extra', 2, 6), ('Messaged a friend first', 'extra', 2, 7),
-    ('Skincare routine', 'extra', 2, 8), ('Journalled more than a line', 'extra', 2, 9),
-    ('Phone out of the bedroom', 'extra', 2, 10), ('Screens off by 11pm', 'extra', 2, 11),
-    ('In bed by 11.30', 'extra', 2, 12), ('Stepped outside within an hour of waking', 'extra', 2, 13),
-    ('Krav Maga', 'superpower', 5, 1), ('Reformer Pilates', 'superpower', 5, 2),
-    ('Gym session', 'superpower', 5, 3), ('Saw someone in person', 'superpower', 5, 4),
-    ('Whole day without gaming', 'superpower', 5, 5),
-    ('Chose not to drink when you wanted to', 'superpower', 5, 6),
-    ('Went somewhere new', 'superpower', 5, 7),
-    ('Did something that scared you slightly', 'superpower', 5, 8),
-    ('Cancelled nothing', 'superpower', 5, 9), ('Full unbroken night''s sleep', 'superpower', 5, 10),
-    ('Therapy or psychiatry appointment attended', 'superpower', 5, 11),
-    ('A deliberate rest day', 'superpower', 5, 12)
-  ) as d(label, grp, pts, ord);
+  insert into public.items (user_id, label, group_name, points, sort_order, domain, traits)
+  select target, label, grp, pts, ord, dom, tr from (values
+    ('Ate', 'core', 1, 1, 'kitchen', array['care']),
+    ('Ate before 11am', 'core', 1, 2, 'kitchen', array['steadiness']),
+    ('Water', 'core', 1, 3, 'kitchen', array['care']),
+    ('Meds taken', 'core', 1, 4, 'bathroom', array['care']),
+    ('Elvanse at a consistent time', 'core', 1, 5, 'bathroom', array['steadiness']),
+    ('Slept', 'core', 1, 6, 'bedroom', array['calm']),
+    ('Teeth', 'core', 1, 7, 'bathroom', array['care']),
+    ('Shower', 'core', 1, 8, 'bathroom', array['care']),
+    ('Changed clothes', 'core', 1, 9, 'bathroom', array['care']),
+    ('Made the bed', 'core', 1, 10, 'bedroom', array['steadiness']),
+    ('Daylight before noon', 'core', 1, 11, 'doorway', array['steadiness']),
+    ('Left the house', 'core', 1, 12, 'doorway', array['courage']),
+    ('Replied to one message', 'core', 1, 13, 'living', array['warmth']),
+    ('Took something out of the flat', 'core', 1, 14, 'doorway', array['steadiness']),
+    ('Walk', 'extra', 2, 1, 'doorway', array['strength']),
+    ('Duolingo', 'extra', 2, 2, 'reading', array['curiosity']),
+    ('Read anything', 'extra', 2, 3, 'reading', array['curiosity']),
+    ('Cooked rather than ordered', 'extra', 2, 4, 'kitchen', array['care', 'steadiness']),
+    ('Tidied one surface', 'extra', 2, 5, 'reading', array['steadiness']),
+    ('One admin task', 'extra', 2, 6, 'reading', array['steadiness']),
+    ('Messaged a friend first', 'extra', 2, 7, 'living', array['warmth']),
+    ('Skincare routine', 'extra', 2, 8, 'bathroom', array['care']),
+    ('Journalled more than a line', 'extra', 2, 9, 'reading', array['steadiness', 'calm']),
+    ('Phone out of the bedroom', 'extra', 2, 10, 'bedroom', array['calm']),
+    ('Screens off by 11pm', 'extra', 2, 11, 'bedroom', array['calm']),
+    ('In bed by 11.30', 'extra', 2, 12, 'bedroom', array['calm']),
+    ('Stepped outside within an hour of waking', 'extra', 2, 13, 'doorway', array['steadiness']),
+    ('Krav Maga', 'superpower', 5, 1, 'doorway', array['strength', 'courage']),
+    ('Reformer Pilates', 'superpower', 5, 2, 'doorway', array['strength']),
+    ('Gym session', 'superpower', 5, 3, 'doorway', array['strength']),
+    ('Saw someone in person', 'superpower', 5, 4, 'living', array['warmth']),
+    ('Whole day without gaming', 'superpower', 5, 5, 'reading', array['calm']),
+    ('Chose not to drink when you wanted to', 'superpower', 5, 6, 'bathroom', array['courage', 'care']),
+    ('Went somewhere new', 'superpower', 5, 7, 'doorway', array['curiosity', 'courage']),
+    ('Did something that scared you slightly', 'superpower', 5, 8, 'doorway', array['courage']),
+    ('Cancelled nothing', 'superpower', 5, 9, 'living', array['courage']),
+    ('Full unbroken night''s sleep', 'superpower', 5, 10, 'bedroom', array['calm']),
+    ('Therapy or psychiatry appointment attended', 'superpower', 5, 11, 'bathroom', array['courage', 'care']),
+    ('A deliberate rest day', 'superpower', 5, 12, 'bedroom', array['calm'])
+  ) as d(label, grp, pts, ord, dom, tr);
 end;
 $$;

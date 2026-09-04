@@ -1,6 +1,6 @@
-# Blossom
+# grow
 
-A private daily self-care tracker where everything you log grows a garden.
+A private daily self-care tracker. Everything you log grows a room in your home, a trait in you, and one row in a tapestry.
 See `SPEC.md` for the original design brief.
 
 ## Setup (fresh)
@@ -16,9 +16,9 @@ See `SPEC.md` for the original design brief.
 
 If your project was created with the first version of `schema.sql` (fixed
 boolean columns), run `supabase/migrations/002_dynamic_items.sql` once in the
-SQL editor. It creates the `items` table, seeds the default items, copies your
-existing ticks into `entries.done_items`, and removes the old columns. Nothing
-is lost. Do not run `schema.sql` again on an upgraded database.
+SQL editor, then `003_grow.sql`. They create the `items` and `profiles` tables, seed the
+default items with their rooms and traits, and carry existing ticks across. Nothing is
+lost. Do not run `schema.sql` on an upgraded database.
 
 ## Deploy (Vercel)
 
@@ -32,16 +32,17 @@ All rules live in `lib/garden-logic.ts` and `lib/streak.ts`.
 - Every item has its own point value (defaults: Core 1, Extra 2, Superpower 5).
 - A day after a zero-point day counts double.
 - Lifetime points are a high-water mark stored in `garden_state`; they never go down.
-- Plants unlock at the thresholds in `PLOT_ONE` / `PLOT_TWO`; the sprout is there from the start.
-- Garden objects (badges) are lifetime counts defined in `lib/badges.ts`: a 30-day streak,
-  seven full-Core days, 100 days logged, ten Superpowers.
+- Rooms level up from the points of items in their domain (`lib/grow/rooms.ts`).
+- Traits level up from the items that feed them (`lib/grow/traits.ts`).
+- The tapestry weaves one row per day from mood, points and superpowers (`lib/grow/tapestry.ts`).
+- The theme follows the device clock: evening from 7pm to 6am (`lib/grow/theme.ts`).
 - The streak counts consecutive days with points, back from today (or yesterday if
   today is not logged yet).
 
 ## Layout
 
-- `app/` — routes: today (`/`), `/calendar`, `/entry/[date]`, `/garden`, `/stats`, `/notes`,
-  `/settings`, `/login`, auth callback, CSV export at `/api/export`.
+- `app/` — routes: today (`/`), `/home`, `/tapestry`, `/journal`, `/you`, `/entry/[date]`,
+  `/calendar`, `/stats`, `/settings`, `/login`, auth callback, CSV export at `/api/export`.
 - `components/` — small single-purpose UI pieces, grouped by screen. `components/art/` is the
   SVG sprite sheet (plants, badges, flower stages, decorations) ported from the design canvas.
 - `lib/` — types, local-date helpers, point rules, Supabase clients and all queries.

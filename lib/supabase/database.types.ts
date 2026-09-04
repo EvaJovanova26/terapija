@@ -1,4 +1,4 @@
-import type { Entry, GardenState, Item } from "../types";
+import type { Entry, GardenState, Item, Profile } from "../types";
 
 /** Minimal hand-written schema type mirroring supabase/schema.sql. */
 export interface Database {
@@ -14,6 +14,12 @@ export interface Database {
         Row: Item;
         Insert: Partial<Item> & Pick<Item, "label" | "group_name">;
         Update: Partial<Item>;
+        Relationships: [];
+      };
+      profiles: {
+        Row: Profile;
+        Insert: Partial<Profile>;
+        Update: Partial<Profile>;
         Relationships: [];
       };
       garden_state: {

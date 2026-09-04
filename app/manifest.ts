@@ -2,9 +2,9 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Blossom",
-    short_name: "Blossom",
-    description: "Log the day, grow a garden.",
+    name: "grow",
+    short_name: "grow",
+    description: "Small daily things, a life you can see.",
     start_url: "/",
     scope: "/",
     display: "standalone",

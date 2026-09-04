@@ -1,44 +1,101 @@
 @import "tailwindcss";
 
-/* Blossom palette, from the design canvas. */
+/*
+ * grow palette. Two moods switched by the real clock via data-theme on <html>.
+ * Provisional values until the design canvas lands; only this block changes then.
+ */
+:root {
+  --t-bg: #f6efe4;
+  --t-card: #fffaf2;
+  --t-line: #e6d8c4;
+  --t-ink: #2f2a33;
+  --t-ink-soft: #6f6672;
+  --t-ink-faint: #a49aa6;
+  --t-accent: #c8643a;
+  --t-accent-soft: #f3d9cb;
+  --t-gold: #d9a441;
+  --t-sage: #6f8f6a;
+  --t-sage-soft: #dfe8d8;
+  --t-lamp: #f4dfa8;
+  --t-tab: #fbf5ea;
+  --t-room-kitchen: #c8643a;
+  --t-room-reading: #7b5ea7;
+  --t-room-bedroom: #4a6fa5;
+  --t-room-doorway: #6f8f6a;
+  --t-room-bathroom: #3f9aa8;
+  --t-room-living: #b5537a;
+  --t-mood-1: #8a7fa8;
+  --t-mood-2: #5f8fb8;
+  --t-mood-3: #6f8f6a;
+  --t-mood-4: #d9a441;
+  --t-mood-5: #c8643a;
+  --t-undyed: #e6d8c4;
+}
+
+:root[data-theme="evening"] {
+  --t-bg: #2b1a2c;
+  --t-card: #3a2439;
+  --t-line: #553a55;
+  --t-ink: #f4e6d6;
+  --t-ink-soft: #c9b3bf;
+  --t-ink-faint: #8f7690;
+  --t-accent: #e08a4a;
+  --t-accent-soft: #5a3a3a;
+  --t-gold: #e6b85c;
+  --t-sage: #8fb08a;
+  --t-sage-soft: #3f4a3e;
+  --t-lamp: #f0c979;
+  --t-tab: #331f33;
+  --t-undyed: #4a334a;
+}
+
 @theme {
-  --color-bg: #ffeaf4;
-  --color-card: #ffffff;
-  --color-line: #f6c3df;
-  --color-ink: #4b0f45;
-  --color-ink-soft: #8a3e7a;
-  --color-ink-faint: #a868a8;
-  --color-pink-100: #fbd3e9;
-  --color-pink-200: #fbd9ea;
-  --color-pink-300: #f79ac8;
-  --color-pink-500: #ec4b98;
-  --color-pink-700: #c81e7c;
-  --color-berry: #a8125f;
-  --color-input: #fff5fb;
-  --color-input-line: #f2afd3;
-  --color-violet: #9b5de5;
-  --color-violet-ink: #7b2fd4;
-  --color-violet-deep: #5b2a8c;
-  --color-violet-100: #f9f1ff;
-  --color-violet-200: #e6d6fb;
-  --color-violet-300: #dcc8f5;
-  --color-violet-400: #c9a6f0;
-  --color-gold: #ffb627;
-  --color-gold-ink: #8a4b00;
-  --color-gold-100: #fffbeb;
-  --color-gold-200: #ffe9b0;
-  --color-gold-300: #ffd97a;
-  --color-gold-400: #ffcf70;
-  --color-mint: #1fc29a;
-  --color-mint-100: #dffbef;
-  --color-mint-300: #9fe8d2;
-  --color-aqua: #2eb8e6;
-  --color-coral: #ff7a3d;
-  --color-leaf: #6bcb77;
-  --color-tabbar: #fdf3f1;
-  --font-display: var(--font-baloo), "Baloo 2", cursive;
-  --font-body: var(--font-nunito), Nunito, system-ui, sans-serif;
-  --radius-card: 22px;
+  --color-bg: var(--t-bg);
+  --color-card: var(--t-card);
+  --color-line: var(--t-line);
+  --color-ink: var(--t-ink);
+  --color-ink-soft: var(--t-ink-soft);
+  --color-ink-faint: var(--t-ink-faint);
+  --color-accent: var(--t-accent);
+  --color-accent-soft: var(--t-accent-soft);
+  --color-gold: var(--t-gold);
+  --color-sage: var(--t-sage);
+  --color-sage-soft: var(--t-sage-soft);
+  --color-lamp: var(--t-lamp);
+  --color-tabbar: var(--t-tab);
+  --color-room-kitchen: var(--t-room-kitchen);
+  --color-room-reading: var(--t-room-reading);
+  --color-room-bedroom: var(--t-room-bedroom);
+  --color-room-doorway: var(--t-room-doorway);
+  --color-room-bathroom: var(--t-room-bathroom);
+  --color-room-living: var(--t-room-living);
+  /* Compatibility names from the earlier palette, mapped onto the new one so
+     screens not yet restyled keep working. Remove once the design pass lands. */
+  --color-pink-100: var(--t-accent-soft);
+  --color-pink-200: var(--t-accent-soft);
+  --color-pink-300: var(--t-accent);
+  --color-pink-500: var(--t-accent);
+  --color-pink-700: var(--t-accent);
+  --color-berry: var(--t-accent);
+  --color-input: var(--t-card);
+  --color-input-line: var(--t-line);
+  --color-violet: var(--t-room-reading);
+  --color-violet-ink: var(--t-room-reading);
+  --color-violet-deep: var(--t-room-reading);
+  --color-violet-100: var(--t-card);
+  --color-violet-200: var(--t-line);
+  --color-violet-300: var(--t-line);
+  --color-violet-400: var(--t-room-reading);
+  --color-gold-ink: var(--t-gold);
+  --color-gold-100: var(--t-card);
+  --color-gold-200: var(--t-line);
+  --color-gold-300: var(--t-gold);
+  --color-gold-400: var(--t-gold);
+  --color-mint: var(--t-sage);
+  --color-mint-100: var(--t-sage-soft);
+  --color-mint-300: var(--t-sage);
+  --font-display: var(--font-fraunces), Georgia, serif;
+  --font-body: var(--font-nunito), system-ui, sans-serif;
 }
 
 html {
@@ -51,14 +108,9 @@ body {
   color: var(--color-ink);
   font-family: var(--font-body);
   overscroll-behavior-y: none;
+  transition: background-color 0.4s ease, color 0.4s ease;
 }
 
 .safe-bottom {
   padding-bottom: env(safe-area-inset-bottom);
 }
-
-@keyframes bloom {
-  from { transform: scale(0.97); opacity: 0.6; }
-  to { transform: scale(1); opacity: 1; }
-}
-.bloom { animation: bloom 0.35s ease-out; }

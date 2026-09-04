@@ -2,7 +2,7 @@ import Link from "next/link";
 import ItemsEditor from "@/components/settings/ItemsEditor";
 import SettingsBlock from "@/components/settings/SettingsBlock";
 
-export const metadata = { title: "Items · Blossom" };
+export const metadata = { title: "Items · grow" };
 
 export default function SettingsPage() {
   return (

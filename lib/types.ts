@@ -7,6 +7,12 @@ export const GROUP_META: Record<ItemGroup, { title: string; hint: string; defaul
   superpower: { title: "Superpower", hint: "The big ones.", defaultPoints: 5, maxItems: 24 },
 };
 
+export const DOMAINS = ["kitchen", "reading", "bedroom", "doorway", "bathroom", "living"] as const;
+export type Domain = (typeof DOMAINS)[number];
+
+export const TRAITS = ["strength", "curiosity", "warmth", "courage", "care", "calm", "steadiness"] as const;
+export type Trait = (typeof TRAITS)[number];
+
 /** A row in `items`: something the user can tick on a day. */
 export type Item = {
   id: string;
@@ -15,6 +21,10 @@ export type Item = {
   group_name: ItemGroup;
   points: number;
   sort_order: number;
+  /** Which room this feeds. */
+  domain: Domain;
+  /** Which traits this feeds. */
+  traits: Trait[];
   retired_at: string | null;
   created_at: string;
   updated_at: string;
@@ -74,6 +84,25 @@ export function toDraft(entry: Entry): EntryDraft {
   const { id: _id, user_id: _u, created_at: _c, updated_at: _up, ...draft } = entry;
   return { ...draft, bedtime: draft.bedtime ? draft.bedtime.slice(0, 5) : null };
 }
+
+/** Avatar choices. Every field optional so an empty object is a valid start. */
+export type Avatar = {
+  skin?: string;
+  hair?: string;
+  eyes?: string;
+  hairStyle?: number;
+  face?: number;
+  outfit?: number;
+  extras?: string[];
+};
+
+export type Profile = {
+  user_id: string;
+  display_name: string | null;
+  avatar: Avatar;
+  created_at: string;
+  updated_at: string;
+};
 
 export type GardenState = {
   user_id: string;
